@@ -19,19 +19,15 @@ Algorithms used:
 
 The best values of C (LogisticRegression), random_state (DecisionTree, RrandomForest), nu (NuSVC), n_neighbors (KNeighbors) were chosen with GridSearchCV.
 
-Parametru Text 
-cleaning 
-Stop 
-words 
-Punctuation Word 
-stemming 
-Word 
-lemmatization 
-n-gram Toate
                   clean  sw   punct  stem  lemm   ngrams  all
 C                 1000   100  1000   100   1000   100     0.001 
 nu*(1)            0.3    0.3  0.3    0.3   0.3    0.7     0.7 
 nu*(2)            0.3    0.3  0.3    0.3   0.3    0.3     0.3 
 n_neighbors       11     21   17     19    13     21      21 
 random_state(1)*  1      12   13     18    15     12      12 
-random_state(2)*  15     10   9      11    7      8       15 
+random_state(2)*  15     10   9      11    7      8       15
+
+nu*(1) - NuSVC rbf
+nu*(2) - NuSVC linear
+random_state(1)* - RandomForest
+random_state(2)* - DecisionTree
