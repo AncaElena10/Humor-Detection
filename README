@@ -8,3 +8,13 @@ Features extracted:
 -> stem words
 -> lemm words
 -> n-grams (2, 3 words)
+
+Algorithms used:
+-> Logistic Regression
+-> Naive Bayes (Bernoulli, Multinomial)
+-> SVM (LinearSVC, SVC (with kernel = linear or rbf), NuSVC (with kernel = linear or rbf))
+-> DecisionTree
+-> RandonForest
+-> KNeighbors
+
+The best values of C (LogisticRegression), random_state (DecisionTree, RrandomForest), nu (NuSVC), n_neighbors (KNeighbors) were chosen with GridSearchCV.
