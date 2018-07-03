@@ -1,5 +1,4 @@
 from itertools import chain
-
 from sklearn import model_selection
 from sklearn.pipeline import Pipeline
 import nltk
@@ -8,45 +7,24 @@ import os
 import io
 from pandas import DataFrame
 import graphviz
-# from sklearn.datasets import make_blobs
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB, GaussianNB, BernoulliNB
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC, LinearSVC, NuSVC
 from sklearn.ensemble import RandomForestClassifier
-# from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
-# import sklearn.svm.libsvm.decision_function
-# from sklearn.svm.libsvm import predict
 from sklearn.utils.multiclass import _ovr_decision_function
 from sklearn.metrics import accuracy_score, roc_curve, auc, f1_score, recall_score, precision_score, confusion_matrix
 import matplotlib.pyplot as plt
-# import matplotlib.pyplot as plt1
-# from sklearn import metrics
-# from ggplot import *
-# from sklearn.metrics import confusion_matrix
 import numpy as np
-# from sklearn.metrics import accuracy_score
-# import itertools
-# from matplotlib.colors import ListedColormap
 from decimal import Decimal
-# from nltk.classify import NaiveBayesClassifier
 from itertools import chain
 import re
 import string
-# from sklearn.model_selection import train_test_split
-# from sklearn import metrics
-# from pandas.plotting import scatter_matrix
 from nltk.stem.porter import PorterStemmer
 from sklearn.model_selection import cross_val_score, GridSearchCV
-# from sklearn.model_selection import cross_val_predict
-# import seaborn as sns
-# from collections import OrderedDict
-# import n_gram as ngb
 import timeit
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# from sklearn.pipeline import make_union
 from nltk import ngrams
 from collections import Counter
 from nltk import precision, recall
@@ -73,10 +51,12 @@ def main():
     X_train, y_train, X_test, y_test = prepare_train_and_test(train_pos, train_neg, test_pos, test_neg)
 
     feat_train = feature(X_train)
-    # aduc lista de feats la forma de fit -> [['a', 'b'], ['c', 'd']] => ['a b', 'c d']
-    # updated_feat_train = ([' '.join(i) for i in feat_train])
+    # bring the list to fit form -> [['a', 'b'], ['c', 'd']] => ['a b', 'c d']
+    # this is needed in case of lemmatization and in case of adding all the features
+    updated_feat_train = ([' '.join(i) for i in feat_train])
 
-    # k_neigh_scores(feat_train, y_train, X_test, y_test)
+    # knn some tests based on n_neighbors value
+   k_neigh_scores(feat_train, y_train, X_test, y_test)
 
     lr = 'LogisticRegression'
     gnb = 'GaussianNB'
@@ -89,18 +69,18 @@ def main():
     dt = 'DecisionTreeClassifier'
     rf = 'RandomForestClassifier'
 
-    # construire model
-    model = build_models_NLP(mnb, X_train, y_train) # text cleaning, n-grame
+    # build model based on what features I want to extract
+    model = build_models_NLP(mnb, X_train, y_train) # text cleaning, n-grams
     # model = build_models_NLP(lr, feat_train, y_train) # sw, punct, stem
-    # model = build_models_NLP(lr, updated_feat_train, y_train) # lemm, toate
+    # model = build_models_NLP(lr, updated_feat_train, y_train) # lemm, all_features
 
-    # EVALUARE MODEL - RETURNARE VALORI METRICI
+    # EVALUATE MODEL - RETURN METRICS VALUES
     evaluate_model(model, X_test, y_test)
 
     # CROSS VALIDATION
-    # cross_validation(model, X_train, y_train)
+    cross_validation(model, X_train, y_train)
 
-    # TESTARE TEXT
+    # TEST SOME TEXT HERE
     X_text_to_test = ["let's joke!"]
     test_some_text(model, X_text_to_test)
 
@@ -127,7 +107,7 @@ def load_data():
         train_pos = ([" ".join(j for j in w.split() if len(j) >= 3) for w in train_pos])
 
         # TEXT CLEANING
-        # train_pos = remove_apostrophe_words(train_pos)
+        train_pos = remove_apostrophe_words(train_pos)
 
     with open("./data/neg/train-neg.txt", "r", encoding="utf8") as f:
         # LOWER CASE
@@ -137,7 +117,7 @@ def load_data():
         train_neg = ([" ".join(j for j in w.split() if len(j) >= 3) for w in train_neg])
 
         # TEXT CLEANING
-        # train_neg = remove_apostrophe_words(train_neg)
+        train_neg = remove_apostrophe_words(train_neg)
 
     with open("./data/pos/test-pos.txt", "r", encoding="utf8") as f:
         # LOWER CASE
@@ -155,7 +135,10 @@ def feature(X_train):
 
     tokenized_sentence = []
     for sentence in X_train:
+        # 3 ways of tokenization
         tokenized_sentence.append(sentence_punct_tokenization(sentence))
+        # tokenized_sentence.append(sentence_tokenization(sentence))
+        # tokenized_sentence.append(sentence_split_tokenization(sentence))
 
     # NO STOP WORDS
     train_without_stopwords = remove_stopwords(tokenized_sentence, updated_stopwords)
@@ -175,8 +158,12 @@ def feature(X_train):
     # feat_train = stem_words(feat_train)
     # feat_train = ([lemmatize_words(sentence) for sentence in feat_train])
 
-    return train_without_stopwords
+    # return based on what features Ii want to extract
+    # there are 5 possible ways of returning: extract stop words, extract punctuation,
+    # word stem, word lemm, and all the features
+    return train_without_stopwords # we choose to extract stop words
     # return train_without_punctuation
+    # return stemmed_train
     # return lemmatized_train
     # return feat_train
 
@@ -251,7 +238,7 @@ def remove_apostrophe_words(train):
 
 
 def build_models_NLP(classifier, X_train, y_train):
-    ############################################ CEI MAI APROPIATI K-VECINI ############################################
+    ######################################################## KNN ######################################################
     if (classifier == 'KNeighborsClassifier'):
         param_grid = {'n_neighbors': [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21]}
         build_classifier = globals()[classifier]()
@@ -259,9 +246,9 @@ def build_models_NLP(classifier, X_train, y_train):
 
     ################################################ LOGISTIC REGRESSION ###############################################
     if (classifier == 'LogisticRegression'):
-        # param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
+        param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
         build_classifier = globals()[classifier]()
-        # build_classifier = GridSearchCV(build_classifier, param_grid)
+        build_classifier = GridSearchCV(build_classifier, param_grid)
 
     ####################################################### SVM ########################################################
     # SVC
@@ -302,7 +289,7 @@ def build_models_NLP(classifier, X_train, y_train):
     #                      ('tfidf', TfidfTransformer()),
     #                      ('clf', build_classifier)])
 
-    # pentru GaussianNB
+    # for GaussianNB we need DenseTransformer
     # text_clf = Pipeline([('vectorizer', CountVectorizer()),
     #                      ('to_dense', DenseTransformer()),
     #                      ('classifier', build_classifier)
@@ -313,7 +300,7 @@ def build_models_NLP(classifier, X_train, y_train):
                          ('clf', build_classifier),
                          ])
     model = text_clf.fit(X_train, y_train)
-    # print(build_classifier.best_estimator_)
+    print(build_classifier.best_estimator_)
 
     return model
 
