@@ -1,0 +1,10 @@
+I have provided a solution for humor detection in binary data.
+
+Features extracted:
+-> remove word with length less than 3
+-> text cleaning (bring the words to their 'complete' form; that means removing the words with aportrofe (like haven't, it will become have not)
+-> stop word (but just a few of them, I don't want to extract all the stop words because some of them can give the text a negative sentiment like 'not' or 'no' and if I remove them, then the sentence will automatically become a positive one, which is wrong.
+-> punctuation
+-> stem words
+-> lemm words
+-> n-grams (2, 3 words)
